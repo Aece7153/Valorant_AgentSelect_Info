@@ -10,7 +10,7 @@ AREAS = [
 ]
 
 # Define the starting screen area to detect (x, y, width, height)
-START_AREA = (100, 100, 200, 50)  # Placeholder: Adjust to match your starting screen UI element
+START_AREA = (1, 1, 1920, 1080)  # Placeholder: Adjust to match your starting screen UI element
 
 # Paths to folders containing reference agent images
 DEFAULT_IMAGE_FOLDER = "agent_images/"  # Default state (no blue overlay, confirmed)
@@ -18,13 +18,13 @@ SELECTED_IMAGE_FOLDER = "agent_images_selected/"  # Selected state (with blue ov
 START_SCREEN_FOLDER = "start_screen_images/"  # Starting screen reference image
 
 # Comparison threshold
-MATCH_THRESHOLD = 0.7  # Adjusted for robustness
+MATCH_THRESHOLD = 0.9  # Adjusted for robustness
 
 # Maximum dimensions for resizing reference images
 MAX_WIDTH = 141
 MAX_HEIGHT = 125
 
-# Starting screen detection threshold
+# Starting screen d etection threshold
 START_THRESHOLD = 0.62 # Higher threshold for reliable starting screen detection
 
 # Agent roles
@@ -49,6 +49,7 @@ AGENT_ROLES = {
     "astra": "smokes",
     "harbor": "smokes",
     "viper": "smokes",
+    "clove": "smokes",
 
     "skye": "initiator",
     "breach": "initiator",
