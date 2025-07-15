@@ -1,4 +1,5 @@
 # config.py
+from datetime import datetime
 
 # Define the five areas to scan (x, y, width, height)
 AREAS = [
@@ -10,9 +11,10 @@ AREAS = [
 ]
 
 # Define the starting screen area to detect (x, y, width, height)
-START_AREA = (1, 1, 1920, 1080)  # Placeholder: Adjust to match your starting screen UI element
+START_AREA = (805, 603, 301, 191)  # Placeholder: Adjust to match your starting screen UI element
 
 # Paths to folders containing reference agent images
+DISPLAY_AGENTS_FOLDER = "Agents/"
 DEFAULT_IMAGE_FOLDER = "agent_images/"  # Default state (no blue overlay, confirmed)
 SELECTED_IMAGE_FOLDER = "agent_images_selected/"  # Selected state (with blue overlay)
 START_SCREEN_FOLDER = "start_screen_images/"  # Starting screen reference image
@@ -24,8 +26,8 @@ MATCH_THRESHOLD = 0.9  # Adjusted for robustness
 MAX_WIDTH = 141
 MAX_HEIGHT = 125
 
-# Starting screen d etection threshold
-START_THRESHOLD = 0.62 # Higher threshold for reliable starting screen detection
+# Starting screen detection threshold
+START_THRESHOLD = 0.74 # Higher threshold for reliable starting screen detection
 
 # Agent roles
 AGENT_ROLES = {
@@ -43,6 +45,7 @@ AGENT_ROLES = {
     "killjoy": "sentinel",
     "chamber": "sentinel",
     "deadlock": "sentinel",
+    "vyse": "sentinel",
 
     "brimstone": "smokes",
     "omen": "smokes",
@@ -56,5 +59,9 @@ AGENT_ROLES = {
     "sova": "initiator",
     "fade": "initiator",
     "gekko": "initiator",
-    "kayo": "initiator"
+    "kayo": "initiator",
+    "tejo": "initiator"
 }
+
+CSV_FILENAME = f"data/valorant_scanner_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+ICON_IMAGE_PATH = f"Icon_image/icon.ico"

@@ -1,0 +1,6 @@
+Area,Agent,Role,Confidence,Selected In (sec),Confirmed In (sec)
+Area 1,phoenix,duelist,0.00,23.00,25.20
+Area 2,sage,sentinel,0.00,28.51,29.97
+Area 3,iso,duelist,0.00,4.12,4.81
+Area 4,jett,duelist,0.00,0.60,1.38
+Area 5,skye,initiator,0.00,44.92,46.39
