@@ -1,0 +1,6 @@
+Area,Agent,Role,Confidence,Selected In (sec),Confirmed In (sec)
+Area 1,omen,smokes,0.92,49.05,67.32
+Area 2,reyna,duelist,0.00,10.78,11.47
+Area 3,vyse,sentinel,0.93,17.32,81.78
+Area 4,clove,smokes,0.96,2.64,5.07
+Area 5,waylay,duelist,0.97,4.37,4.37

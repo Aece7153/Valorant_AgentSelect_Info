@@ -20,14 +20,14 @@ SELECTED_IMAGE_FOLDER = "agent_images_selected/"  # Selected state (with blue ov
 START_SCREEN_FOLDER = "start_screen_images/"  # Starting screen reference image
 
 # Comparison threshold
-MATCH_THRESHOLD = 0.9  # Adjusted for robustness
+MATCH_THRESHOLD = 0.85  # Adjusted for robustness
 
 # Maximum dimensions for resizing reference images
 MAX_WIDTH = 141
 MAX_HEIGHT = 125
 
 # Starting screen detection threshold
-START_THRESHOLD = 0.74 # Higher threshold for reliable starting screen detection
+START_THRESHOLD = 0.95 # Higher threshold for reliable starting screen detection
 
 # Agent roles
 AGENT_ROLES = {
@@ -64,4 +64,4 @@ AGENT_ROLES = {
 }
 
 CSV_FILENAME = f"data/valorant_scanner_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-ICON_IMAGE_PATH = f"Icon_image/icon.ico"
+ICON_IMAGE_PATH = f"../../Downloads/Valorant_AgentSelect_Info-main (1)/Valorant_AgentSelect_Info-main/Icon_image/icon.ico"

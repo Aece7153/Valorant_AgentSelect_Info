@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Set up folder path
-DATA_DIR = './data'  # change if needed
+DATA_DIR = '../../Downloads/Valorant_AgentSelect_Info-main (1)/Valorant_AgentSelect_Info-main/data'  # change if needed
 
 # Read and combine all CSV files
 def load_all_data(directory):

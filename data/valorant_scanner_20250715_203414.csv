@@ -1,0 +1,6 @@
+Area,Agent,Role,Confidence,Selected In (sec),Confirmed In (sec)
+Area 1,sova,initiator,0.93,5.66,67.35
+Area 2,yoru,duelist,0.94,47.86,49.13
+Area 3,breach,initiator,0.88,0.93,7.40
+Area 4,clove,smokes,0.98,55.45,65.82
+Area 5,reyna,duelist,0.92,3.36,4.48

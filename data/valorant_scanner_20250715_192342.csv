@@ -1,0 +1,6 @@
+Area,Agent,Role,Confidence,Selected In (sec),Confirmed In (sec)
+Area 1,raze,duelist,0.93,2.08,2.08
+Area 2,waylay,duelist,0.94,0.93,0.93
+Area 3,vyse,sentinel,0.95,1.32,1.32
+Area 4,omen,smokes,0.98,19.11,20.29
+Area 5,sova,initiator,0.97,6.14,20.69

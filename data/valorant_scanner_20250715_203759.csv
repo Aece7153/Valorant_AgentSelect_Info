@@ -1,0 +1,6 @@
+Area,Agent,Role,Confidence,Selected In (sec),Confirmed In (sec)
+Area 1,chamber,sentinel,0.96,4.34,4.34
+Area 2,neon,duelist,0.92,76.30,76.30
+Area 3,breach,initiator,0.87,1.23,2.26
+Area 4,sage,sentinel,0.95,10.50,12.67
+Area 5,phoenix,duelist,0.98,81.35,84.42
