@@ -7,14 +7,12 @@ import pyautogui
 from PIL import Image
 import cv2
 import numpy as np
-from config import AGENT_ROLES, AREAS, CSV_FILENAME, ICON_IMAGE_PATH, START_THRESHOLD, DEFAULT_IMAGE_FOLDER,DISPLAY_AGENTS_FOLDER
-
-from scanner import scan_and_identify_agents, capture_screen_area
+from config import AGENT_ROLES, AREAS, CSV_FILENAME, ICON_IMAGE_PATH, START_THRESHOLD, DEFAULT_IMAGE_FOLDER, DISPLAY_AGENTS_FOLDER
+from scanner import scan_and_identify_agents, capture_screen_area, reset_scanner_state
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from PIL import ImageTk
-
 
 class ValorantScannerGUI:
     def __init__(self, root):
@@ -37,7 +35,7 @@ class ValorantScannerGUI:
         self.last_results = []
         self.area_images = [None] * 5
         self.area_labels = [None] * 5
-
+        self.is_scanning = False
         self.pages = {}
         self.current_page = None
 
@@ -69,9 +67,21 @@ class ValorantScannerGUI:
         header.pack(pady=(5, 10))
 
         # Scanning Text
-        self.status_label = ctk.CTkLabel(page, text="Status: Waiting for Starting Screen",
+        self.status_label = ctk.CTkLabel(page, text="Status: Waiting to start",
                                          text_color="orange", font=ctk.CTkFont(size=12, weight="bold"))
         self.status_label.pack(anchor="w", pady=(0, 8))
+
+        # Button Frame to hold Start and Reset buttons side by side
+        self.button_frame = ctk.CTkFrame(page, fg_color="transparent")
+        self.button_frame.pack(anchor="w", pady=(5, 10))
+
+        # Start/Stop Button
+        self.start_button = ctk.CTkButton(self.button_frame, text="Start Scanning", command=self.toggle_scanning)
+        self.start_button.pack(side="left", padx=(0, 5))
+
+        # Reset Button
+        self.reset_button = ctk.CTkButton(self.button_frame, text="Reset", command=self.reset_gui)
+        self.reset_button.pack(side="left")
 
         # Lobby Team Comp Distribution
         self.role_summary_label = ctk.CTkLabel(page, text="Team Composition: None",
@@ -95,20 +105,46 @@ class ValorantScannerGUI:
         header_row = ctk.CTkFrame(self.table_frame, fg_color="transparent")
         header_row.pack(fill="x", pady=(0, 4))
         for col in headers:
-            ctk.CTkLabel(header_row, text=col, font=ctk.CTkFont(size=20,weight="bold"),
+            ctk.CTkLabel(header_row, text=col, font=ctk.CTkFont(size=20, weight="bold"),
                          width=150, anchor="center").pack(side="left", padx=5)
 
         # Export Button
         self.export_button = ctk.CTkButton(page, text="Export to CSV", command=self.export_to_csv)
         self.export_button.pack(anchor="se", padx=10, pady=(5, 10))
 
-
         # Toggle View Button
         self.toggle_view_button = ctk.CTkButton(page, text="Go to Analytics View", command=self.show_analytics_page)
         self.toggle_view_button.pack(anchor="se", padx=10, pady=(0, 5))
 
+    def reset_gui(self):
+        """Reset the GUI and scanner state, stopping any active scans."""
+        # Stop scanning if active
+        if self.is_scanning:
+            self.is_scanning = False
+            self.start_time = None
+            self.start_button.configure(text="Start Scanning")
+            self.status_label.configure(text="Status: Reset Complete", text_color="green")
+            self.root.after_cancel(self.check_starting_screen)  # Cancel scheduled checks
+            self.root.after_cancel(self.update_results)  # Cancel scheduled updates
 
+        # Clear GUI data
+        self.last_results = []
+        self.role_summary_label.configure(text="Team Composition: None")
+        # Destroy and recreate area labels to avoid stale image references
+        for i in range(5):
+            if self.area_labels[i] is not None:
+                self.area_labels[i].destroy()
+            self.area_labels[i] = ctk.CTkLabel(self.area_frame, text=f"Area {i+1}", width=142, height=125)
+            self.area_labels[i].pack(side="left", padx=5)
+            self.area_images[i] = None
+            # Clear table rows
+            if self.tree_rows[i] is not None:
+                self.tree_rows[i].destroy()
+                self.tree_rows[i] = None
+                self.row_labels[i] = []
 
+        # Reset scanner state
+        reset_scanner_state()
 
     def build_analytics_page(self):
         page = ctk.CTkFrame(self.page_container, fg_color="transparent")
@@ -126,34 +162,24 @@ class ValorantScannerGUI:
         self.back_btn = ctk.CTkButton(page, text="Back to Scanner", command=self.show_main_page)
         self.back_btn.pack(pady=(5, 15))
 
-    # Switch Between Pages
     def show_page(self, name):
-        # Hide the current page if it exists
         if self.current_page:
             self.pages[self.current_page].pack_forget()
-
-        # Show the requested page
         self.pages[name].pack(fill="both", expand=True)
         self.current_page = name
 
-
-    # Switch to Analytics Page
     def show_analytics_page(self):
         print("Switching to analytics page")
         self.show_page('analytics')
-    # Switch to Main Page
+
     def show_main_page(self):
         print("Switching to main page")
         self.show_page('main')
 
-    # Export Agent information and Time information into a csv directory
     def export_to_csv(self):
-        # If there is no data, CANCEL: export
         if not self.last_results:
             self.status_label.configure(text="No data to export", text_color="red")
             return
-
-        # Save to file path
         csv_filename = CSV_FILENAME
         try:
             with open(csv_filename, 'w', newline='') as csvfile:
@@ -168,7 +194,6 @@ class ValorantScannerGUI:
         except Exception as e:
             self.status_label.configure(text=f"Export failed: {str(e)}", text_color="red")
 
-    #While scanning this method updates the times and agent information when in lobby
     def update_row_content(self, row_idx, area_num, agent_name, score, sel_time, conf_time):
         if self.tree_rows[row_idx] is None:
             self.tree_rows[row_idx] = ctk.CTkFrame(self.table_frame, fg_color="transparent")
@@ -180,7 +205,6 @@ class ValorantScannerGUI:
                 self.row_labels[row_idx].append(label)
 
         labels = self.row_labels[row_idx]
-
         sel_time_str = f"{sel_time:.2f} sec" if sel_time is not None else "Not selected"
         conf_time_str = f"{conf_time:.2f} sec" if conf_time is not None else "Not confirmed"
         values = [f"Area {area_num}", "", AGENT_ROLES.get(agent_name.lower(), "Unknown"),
@@ -196,21 +220,47 @@ class ValorantScannerGUI:
 
     def update_area_images(self, full_screen):
         for i, (x, y, width, height) in enumerate(AREAS):
-            screen_area = capture_screen_area(x, y, width, height, full_screen)
-            screen_area_rgb = cv2.cvtColor(screen_area, cv2.COLOR_BGR2RGB)
-            pil_img = Image.fromarray(screen_area_rgb).resize((142, 125), Image.Resampling.LANCZOS)
-            self.area_images[i] = ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=(142, 125))
-            self.area_labels[i].configure(image=self.area_images[i], text="")
+            try:
+                screen_area = capture_screen_area(x, y, width, height, full_screen)
+                screen_area_rgb = cv2.cvtColor(screen_area, cv2.COLOR_BGR2RGB)
+                pil_img = Image.fromarray(screen_area_rgb).resize((142, 125), Image.Resampling.LANCZOS)
+                # Create new CTkImage and store reference
+                self.area_images[i] = ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=(142, 125))
+                self.area_labels[i].configure(image=self.area_images[i], text="")
+            except Exception as e:
+                print(f"Error updating area image {i+1}: {e}")
+                self.area_labels[i].configure(image=None, text=f"Area {i+1}")
+
+    def toggle_scanning(self):
+        if not self.is_scanning:
+            self.is_scanning = True
+            self.start_button.configure(text="Stop Scanning")
+            self.status_label.configure(text="Status: Waiting for Starting Screen", text_color="orange")
+            self.check_starting_screen()
+            self.update_results()
+        else:
+            self.is_scanning = False
+            self.start_time = None
+            self.start_button.configure(text="Start Scanning")
+            self.status_label.configure(text="Status: Scanning Stopped", text_color="red")
+            self.root.after_cancel(self.check_starting_screen)
+            self.root.after_cancel(self.update_results)
 
     def update_results(self):
+        if not self.is_scanning:
+            return
         if self.start_time is not None:
             try:
                 full_screen = cv2.cvtColor(np.array(pyautogui.screenshot()), cv2.COLOR_RGB2BGR)
                 self.last_results = scan_and_identify_agents(self.start_time) or []
                 self.update_area_images(full_screen)
             except Exception as e:
-                print("Scan error:", e)
+                print(f"Scan error: {e}")
                 self.last_results = []
+                # Reset area images on error to prevent stale references
+                for i in range(5):
+                    self.area_labels[i].configure(image=None, text=f"Area {i+1}")
+                    self.area_images[i] = None
 
             for i, (area_num, agent_name, score, sel_time, conf_time) in enumerate(self.last_results):
                 if i < 5:
@@ -229,16 +279,14 @@ class ValorantScannerGUI:
 
         self.root.after(150, self.update_results)
 
-    # This function checks for the starting screen
     def check_starting_screen(self):
+        if not self.is_scanning:
+            return
         if self.start_time is None:
             result = scan_and_identify_agents(None)
             start_score = scan_and_identify_agents.start_score
             print(f"Starting screen confidence: {start_score:.2f}")
-            if start_score > START_THRESHOLD: #0.74
-                # Start timer
+            if start_score > START_THRESHOLD:
                 self.start_time = time.perf_counter()
                 self.status_label.configure(text="Status: Scanning for agents", text_color="#5D8BF4")
-
-        # Updates every half second
         self.root.after(500, self.check_starting_screen)

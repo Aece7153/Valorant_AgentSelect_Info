@@ -20,14 +20,14 @@ SELECTED_IMAGE_FOLDER = "agent_images_selected/"  # Selected state (with blue ov
 START_SCREEN_FOLDER = "start_screen_images/"  # Starting screen reference image
 
 # Comparison threshold
-MATCH_THRESHOLD = 0.85  # Adjusted for robustness
+MATCH_THRESHOLD = 0.86  # Adjusted for robustness
 
 # Maximum dimensions for resizing reference images
 MAX_WIDTH = 141
 MAX_HEIGHT = 125
 
 # Starting screen detection threshold
-START_THRESHOLD = 0.95 # Higher threshold for reliable starting screen detection
+START_THRESHOLD = 0.74 # Higher threshold for reliable starting screen detection
 
 # Agent roles
 AGENT_ROLES = {

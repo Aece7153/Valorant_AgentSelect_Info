@@ -1,5 +1,3 @@
-# scanner.py
-
 import pyautogui
 import cv2
 import numpy as np
@@ -7,7 +5,6 @@ import time
 import os
 from config import AREAS, DEFAULT_IMAGE_FOLDER, SELECTED_IMAGE_FOLDER, START_SCREEN_FOLDER, MATCH_THRESHOLD, MAX_WIDTH, \
     MAX_HEIGHT, START_AREA, START_THRESHOLD, AGENT_ROLES
-
 
 # Load reference images into memory and resize if necessary
 reference_images = {}
@@ -48,7 +45,6 @@ if START_IMAGES:
         start_img = cv2.resize(start_img, (new_width, new_height), interpolation=cv2.INTER_AREA)
     start_reference = start_img
 
-
 def capture_screen_area(x, y, width, height, full_screen=None):
     """Capture a specific area of the screen or crop from a full screen capture."""
     if full_screen is None:
@@ -56,13 +52,11 @@ def capture_screen_area(x, y, width, height, full_screen=None):
         full_screen = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
     return full_screen[y:y + height, x:x + width]
 
-
 def compare_images(screen_area, reference_img):
     """Compare two images using template matching."""
     result = cv2.matchTemplate(screen_area, reference_img, cv2.TM_CCOEFF_NORMED)
     _, max_val, _, _ = cv2.minMaxLoc(result)
     return max_val
-
 
 # Initialize global dictionaries if not already set
 if 'detection_times' not in globals():
@@ -78,6 +72,20 @@ if 'last_update_times' not in globals():
 if 'start_screen_confirmed' not in globals():
     start_screen_confirmed = False  # Flag to stop further starting screen checks
 
+def reset_scanner_state():
+    """Reset all scanner-related global state variables."""
+    global detection_times, confirmation_times, last_detected_agents, locked_agents, last_update_times, start_screen_confirmed
+    detection_times = {i: None for i in range(1, 6)}
+    confirmation_times = {i: None for i in range(1, 6)}
+    last_detected_agents = {i: None for i in range(1, 6)}
+    locked_agents = {i: None for i in range(1, 6)}
+    last_update_times = {i: 0 for i in range(1, 6)}
+    start_screen_confirmed = False
+    # Reset function-specific attributes
+    if hasattr(scan_and_identify_agents, 'captured_start_screen_area'):
+        scan_and_identify_agents.captured_start_screen_area = None
+    if hasattr(scan_and_identify_agents, 'start_score'):
+        scan_and_identify_agents.start_score = 0.0
 
 def scan_and_identify_agents(start_time=None):
     """Scan the five areas and identify agents by comparing to reference images, tracking selection and confirmation times.
